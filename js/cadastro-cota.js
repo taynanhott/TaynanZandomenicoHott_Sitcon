@@ -11,11 +11,11 @@ $(document).on('click', '#enviar-cota', function () {
             idprocedimentos: $('#select-procedimentos').val()
         }
     });
-    alert("Cadastrado com sucesso!");
+    alert('Cadastro com Sucesso!');
     location.reload();
-});
+})
 
-$jQuery(function ($){
+jQuery(function ($) {
     $("#valor-cota").maskMoney(
         {
             prefix: 'R$ ',
@@ -23,14 +23,14 @@ $jQuery(function ($){
             thousands: '',
             decimal: '.'
         }
-    )
+    );
 });
 
-function numberify(){
+function numberify(value) {
     return parseFloat(
         value
             .trim()
-            .replace(/^R\$ +/, '')     
+            .replace(/^R\$ +/, '')
     ).toFixed(2)
 }
 
@@ -42,6 +42,7 @@ $.ajax({
     data: {
     },
     success: function (data) {
+
         data.procedimentos.forEach(function (item) {
             $('#select-procedimentos').append(`<option value="${item.idprocedimentos}">${item.nome}</option>`);
         });

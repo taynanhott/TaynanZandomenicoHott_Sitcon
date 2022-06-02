@@ -6,8 +6,9 @@ $.ajax({
     data: {
     },
     success: function (data) {
+
         data.procedimentos.forEach(function (item) {
-            $('#select-procedimentos').append(`<option value="${item.idprocedimentos}">${item.nome}</option>`);
+            $('#select-procedimento').append(`<option value="${item.idprocedimentos}">${item.nome}</option>`);
         });
     }
 });
@@ -18,59 +19,65 @@ function listagem() {
     $('#mediaTotal').text("--/--");
     $('#vencedor').text("--/--");
 
-    if($('#select-procedimentos').val() > 0){
+    if ($('#select-procedimento').val() > 0) {
 
-    $.ajax({
-        url: 'load/load_cota.php',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            acao: $('#select-busca').val(),
-            idProcedimento: $('#select-procedimentos').val()
-        },
-        success: function (data) {
-            const {
-                cota
-            } = data;
+        $.ajax({
+            url: 'load/load_cota.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                acao: $('#select-busca').val(),
+                idProcedimento: $('#select-procedimento').val(),
+            },
+            success: function (data) {
+                const {
+                    procedimentos
+                } = data;
+                var media = 0;
+                var cont = 0;
+                var candidato = 0;
+                var fornecedor = "";
 
-            var media = 0;
-            var cont = 0;
-            var candidato = 0;
-            var fornecedor = 0;
+                if (procedimentos.length > 2) {
 
-            if (cota.length > 2) {
-                data.cota.forEach(function (item) {
-                    media += parseFloat(`${item.valorPrestador}`);
-                    cont++;
-                })
+                    data.procedimentos.forEach(function (item) {
+                        media += parseFloat(`${item.valorPrestador}`);
+                        cont++;
+                    })
+                    media = media / cont;
 
-                media = media / cont;
+                    var vencedor = Math.abs(parseFloat(data.procedimentos[0].valorPrestador) - media);
 
-                var vencedor = Math.abs(parseFloat(data.cota[0].valorPrestador) - media);
+                    data.procedimentos.forEach(function (item) {
+                        $('#listagem-table').append(`<tr style="text-align: center">
+                                                        <th>${item.idcota}</th>
+                                                        <th>${item.nome}</th>
+                                                        <th>${item.preparo}</th>
+                                                        <th>${item.fornecedor}</th>
+                                                        <th>R$ ${item.valorPrestador}</th>
+                                                     </tr>`);
 
-                data.procedimentos.forEach(function (item) {
-                    $('#listagem-table').append(`<tr><th>${item.idcota}</th>
-                                                 <th>${item.nome}</th>
-                                                 <th>${item.preparo}</th>
-                                                 <th>${item.fornecedor}</th>
-                                                 <th>${item.valorPrestador}</th>
-                                             </tr>`);
-                    candidato = Math.abs(parseFloat(data.cota[0].valorPrestador) - media);
+                        candidato = Math.abs(parseFloat(`${item.valorPrestador}`) - media);
+                        console.log(candidato);
 
-                    if (cadidato <= vencedor) {
-                        vencedor = candidato;
-                        fornecedor = `${item.fornecedor}`;
-                    }
-                })
+                        if (candidato <= vencedor) {
+                            vencedor = candidato;
+                            fornecedor = `${item.fornecedor}`;
+                        }
 
-                $('#vencedor').text(fornecedor);
-                $('#mediaTotal').text('R$' + media);
-            } else{
-                $('#listagem-table').append(`<tr><th colspan="5">Cotas cadastradas insuficientes!</th></tr>`);
+                    })
+
+                    $('#vencedor').text(fornecedor);
+                    $('#mediaTotal').text('R$ ' + media);
+
+                } else {
+                    $('#listagem-table').append(`<tr style="text-align: center">
+                                            <th colspan="7"> Cotas cadastradas insuficientes! </th>
+                                        </tr>`);
+                }
             }
-        }
-    })
-    }else{
+        })
+    } else {
         alert('Selecione um procedimento!');
     }
-}
+};
